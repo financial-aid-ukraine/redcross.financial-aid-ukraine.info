@@ -1,0 +1,101 @@
+# See: https://docs.github.com/en/actions/reference/workflow-syntax-for-github-actions
+
+name: Deploy to Pages [production]
+
+on:
+  workflow_dispatch:
+  push:
+    branches: ['main']
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: 'pages'
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          submodules: true
+
+      - name: Set up Node.js version
+        uses: actions/setup-node@v3
+        with:
+          node-version-file: 'helpful-information/.node-version'
+          cache-dependency-path: 'helpful-information/package-lock.json'
+          cache: 'npm'
+
+      - name: Install
+        working-directory: 'helpful-information'
+        run: 'npm ci --omit=optional --no-fund --no-audit'
+        env:
+          HUSKY: 0
+
+      - name: Build
+        working-directory: 'helpful-information'
+        run: 'npm run build:production'
+        env:
+          NG_PRODUCTION: 'true'
+          ENV_NAME: ''
+          NG_USE_SERVICE_WORKER: 'true'
+          NG_USE_Q_AND_AS: 'true'
+          NG_USE_Q_AND_A_SEARCH: 'true'
+          TXT_APP_NAME: ''
+          TXT_MAIN_PAGE_HEADER: 'Helpful Information by The Red Cross'
+          TXT_MAIN_PAGE_INTRO: 'Select your language: <br><br> Виберіть мову: <br><br> Válaszd ki a nyelved: <br><br>'
+          TXT_ERROR_HEADER: 'Data Unavailable'
+          TXT_ERROR_MESSAGE: 'Reach out to us at: '
+          TXT_ERROR_CONTACT_URL: 'https://github.com/financial-aid-ukraine/redcross.financial-aid-ukraine.info/issues/new'
+          TXT_ERROR_RETRY: 'Try again?'
+          REGIONS: >-
+            en,
+            uk,
+            hu
+          REGIONS_LABELS: >-
+            English,
+            Українська,
+            Magyar
+          REGIONS_SHEET_IDS: >-
+            1Jx4iqp7K7PSwQ9UmU96Q5R50Cu0ywdxxMD5uDSlU9ys,
+            1EnRmZyl4osJPNXd_m6hSDLevvB20s1Bid3vEGFr0p84,
+            1Mb9rZug0PFYEO7kcvtpVC5KoTqftf1JmL9JE7h4vT1I
+          GOOGLE_SHEETS_API_KEY: ${{ secrets.GOOGLE_SHEETS_API_KEY }}
+          GOOGLE_SHEETS_API_URL: 'https://sheets.googleapis.com/v4/spreadsheets'
+
+      - name: Add static version of region(s)
+        working-directory: 'helpful-information'
+        run: |
+          mkdir www/en && cp www/index.html www/en/index.html
+          mkdir www/uk && cp www/index.html www/uk/index.html
+          mkdir www/hu && cp www/index.html www/hu/index.html
+
+      - name: Add 404.html
+        working-directory: 'helpful-information'
+        run: 'cp www/index.html www/404.html'
+
+      - name: Add robots.txt
+        working-directory: 'helpful-information'
+        run: 'cp src/robots.private.txt www/robots.txt'
+
+      - name: Setup GitHub Pages
+        uses: actions/configure-pages@v2
+
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v1
+        with:
+          path: 'helpful-information/www'
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v1
