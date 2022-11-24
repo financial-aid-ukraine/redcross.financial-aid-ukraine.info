@@ -1,0 +1,6 @@
+[submodule "helpful-information"]
+	path = helpful-information
+	url = https://github.com/rodekruis/helpful-information.git
+	shallow = true
+	branch = v22.11.0
+
