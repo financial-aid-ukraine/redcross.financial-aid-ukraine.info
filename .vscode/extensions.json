@@ -1,0 +1,10 @@
+{
+  "recommendations": [
+    "editorconfig.editorconfig",
+    "dotiful.dotfiles-syntax-highlighting",
+    "ban.spellright",
+    "redhat.vscode-yaml",
+    "esbenp.prettier-vscode",
+    "xshrim.txt-syntax"
+  ]
+}
