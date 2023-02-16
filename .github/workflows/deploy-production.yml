@@ -49,9 +49,11 @@ jobs:
           NG_PRODUCTION: 'true'
           ENV_NAME: ''
           NG_USE_SERVICE_WORKER: 'true'
+          NG_USE_URL_SLUGS: 'true'
           NG_USE_Q_AND_AS: 'true'
           NG_USE_Q_AND_A_SEARCH: 'true'
           TXT_APP_NAME: ''
+          TXT_APP_LOGO_URL: "data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 243 150'%3e%3cpath fill='%23f5333f' d='M57 89H23V60h34V26h29v34h34v29H86v34H57V89zm108-15a41 41 0 0 1 56-39 49 49 0 1 0 0 77 41 41 0 0 1-56-38'/%3e%3c/svg%3e"
           TXT_MAIN_PAGE_HEADER: 'Helpful Information by The Red Cross'
           TXT_MAIN_PAGE_INTRO: 'Select your language: <br><br> Виберіть мову: <br><br> Válaszd ki a nyelved: <br><br>'
           TXT_ERROR_HEADER: 'Data Unavailable'
