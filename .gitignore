@@ -1,0 +1,8 @@
+# The tool package
+helpful-information
+
+# Generated code
+www
+
+# Third party code
+node_modules

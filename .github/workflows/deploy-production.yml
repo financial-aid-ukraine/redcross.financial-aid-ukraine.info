@@ -1,6 +1,91 @@
-# See: https://docs.github.com/en/actions/reference/workflow-syntax-for-github-actions
+env:
+  # ###########################################################################
+  # FEATURES:
+  # ###########################################################################
+  #
+  # For offline support: (set to 'true' / 'false')
+  NG_USE_SERVICE_WORKER: 'true'
+  #
+  # Use the "Offers" content-type: (set to 'true' / 'false')
+  NG_USE_OFFERS: 'false'
+  #
+  # Use the "Q&A" content-type: (set to 'true' / 'false')
+  NG_USE_Q_AND_AS: 'true'
+  #
+  # When using "Q&A"s, you can enable search: (set to 'true' / 'false')
+  NG_USE_Q_AND_A_SEARCH: 'true'
+  #
+  # For demo-purpose only: A highly visible label to show instance name/version
+  ENV_NAME: ''
+  #
+  # ###########################################################################
+  # TEXT CONTENT:
+  # ###########################################################################
+  #
+  # A (short) name, visible in the top (navigation-)bar and in the browser's tab/window-title (and search-engine results)
+  TXT_APP_NAME: ''
+  # A (data-)URL to an image, visible in the top (navigation-)bar
+  TXT_APP_LOGO_URL: data:image/svg+xml;charset=UTF-8,%3csvg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 243 150\'%3e%3cpath fill=\'%23f5333f\' d=\'M57 89H23V60h34V26h29v34h34v29H86v34H57V89zm108-15a41 41 0 0 1 56-39 49 49 0 1 0 0 77 41 41 0 0 1-56-38\'/%3e%3c/svg%3e
+  # The first heading, (only) visible on the main-page
+  TXT_MAIN_PAGE_HEADER: 'Helpful Information by The Red Cross'
+  # The (optional) introduction text, (only) visible on the main-page.
+  # Can be multiple-lines of Markdown syntax or contain some HTML. Newlines need to be specified with `\n` or `<br />`.
+  TXT_MAIN_PAGE_INTRO: >-
+    Select your language: \n
+    \n
+    Виберіть мову: \n
+    \n
+    Válaszd ki a nyelved: \n
+    \n
+  #
+  # An (optional) notice on the bottom of the screen, can be overwritten by the sheet.
+  # Will override the (optional) bottom-right "Contact"-buttons from the sheet.
+  TXT_MAIN_PAGE_NOTICE: ''
+  #
+  # Contents of the 'error-page'
+  #
+  TXT_ERROR_HEADER: 'Data Unavailable'
+  # This Sentence will be followd by a link to the "Contact-URL" set below
+  TXT_ERROR_MESSAGE: 'Reach out to us at: '
+  # Provide a URL that has contact-information on it, or a `mailto:contact@example.org`-URL
+  TXT_ERROR_CONTACT_URL: 'https://github.com/financial-aid-ukraine/redcross.financial-aid-ukraine.info/issues/new'
+  # Call to action on a link that will reload the current page
+  TXT_ERROR_RETRY: 'Try again?'
+  #
+  # ###########################################################################
+  # REGIONS/SHEETS:
+  # ###########################################################################
+  #
+  # When defining multiple regions/sheets, the order in the following 3 variables need to match.
+  # The last option in each list should NOT contain a comma (,) at the end.
+  #
+  # So in this example:
+  #  <REGION>  =  <REGION__LABEL>     =  <REGION__SHEET_ID>
+  #  "test"    =  "Test/Development"  =  "10SIJdAQSd6loqCyzwK409QS_01Fgp8P4aqoDO8iBvhY"
+  #
+  # The URL-part(s) to identify the region
+  REGIONS: >-
+    en,
+    uk,
+    hu
+  # The readable label(s) on the link to the region-page
+  REGIONS_LABELS: >-
+    English,
+    Українська,
+    Magyar
+  # The ID of the Google Sheet(s) that contains the content for the region
+  REGIONS_SHEET_IDS: >-
+    1Jx4iqp7K7PSwQ9UmU96Q5R50Cu0ywdxxMD5uDSlU9ys,
+    1EnRmZyl4osJPNXd_m6hSDLevvB20s1Bid3vEGFr0p84,
+    1Mb9rZug0PFYEO7kcvtpVC5KoTqftf1JmL9JE7h4vT1I
 
-name: Deploy to Pages [production]
+# #############################################################################
+#
+# See: https://docs.github.com/en/actions/reference/workflow-syntax-for-github-actions
+#
+# #############################################################################
+
+name: Deploy to GitHub Pages [production]
 
 on:
   workflow_dispatch:
@@ -26,17 +111,21 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v3
-        with:
-          submodules: true
 
       - name: Set up Node.js version
         uses: actions/setup-node@v3
         with:
-          node-version-file: 'helpful-information/.node-version'
-          cache-dependency-path: 'helpful-information/package-lock.json'
+          node-version-file: 'package.json'
+          cache-dependency-path: 'package.json'
           cache: 'npm'
 
-      - name: Install
+      - name: Install local
+        run: 'npm install --no-save'
+
+      - name: Set-up helpful-information
+        run: 'mv node_modules/helpful-information ./'
+
+      - name: Install helpful-information
         working-directory: 'helpful-information'
         run: 'npm ci --omit=optional --no-fund --no-audit'
         env:
@@ -44,59 +133,33 @@ jobs:
 
       - name: Build
         working-directory: 'helpful-information'
-        run: 'npm run build:production'
+        run: 'npm run build:production -- --output-path=../www'
         env:
           NG_PRODUCTION: 'true'
-          ENV_NAME: ''
-          NG_USE_SERVICE_WORKER: 'true'
-          NG_USE_URL_SLUGS: 'true'
-          NG_USE_Q_AND_AS: 'true'
-          NG_USE_Q_AND_A_SEARCH: 'true'
-          TXT_APP_NAME: ''
-          TXT_APP_LOGO_URL: data:image/svg+xml;charset=UTF-8,%3csvg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 243 150\'%3e%3cpath fill=\'%23f5333f\' d=\'M57 89H23V60h34V26h29v34h34v29H86v34H57V89zm108-15a41 41 0 0 1 56-39 49 49 0 1 0 0 77 41 41 0 0 1-56-38\'/%3e%3c/svg%3e
-          TXT_MAIN_PAGE_HEADER: 'Helpful Information by The Red Cross'
-          TXT_MAIN_PAGE_INTRO: 'Select your language: <br><br> Виберіть мову: <br><br> Válaszd ki a nyelved: <br><br>'
-          TXT_ERROR_HEADER: 'Data Unavailable'
-          TXT_ERROR_MESSAGE: 'Reach out to us at: '
-          TXT_ERROR_CONTACT_URL: 'https://github.com/financial-aid-ukraine/redcross.financial-aid-ukraine.info/issues/new'
-          TXT_ERROR_RETRY: 'Try again?'
-          REGIONS: >-
-            en,
-            uk,
-            hu
-          REGIONS_LABELS: >-
-            English,
-            Українська,
-            Magyar
-          REGIONS_SHEET_IDS: >-
-            1Jx4iqp7K7PSwQ9UmU96Q5R50Cu0ywdxxMD5uDSlU9ys,
-            1EnRmZyl4osJPNXd_m6hSDLevvB20s1Bid3vEGFr0p84,
-            1Mb9rZug0PFYEO7kcvtpVC5KoTqftf1JmL9JE7h4vT1I
           GOOGLE_SHEETS_API_KEY: ${{ secrets.GOOGLE_SHEETS_API_KEY }}
           GOOGLE_SHEETS_API_URL: 'https://sheets.googleapis.com/v4/spreadsheets'
 
       - name: Add static version of region(s)
-        working-directory: 'helpful-information'
         run: |
           mkdir www/en && cp www/index.html www/en/index.html
           mkdir www/uk && cp www/index.html www/uk/index.html
           mkdir www/hu && cp www/index.html www/hu/index.html
 
       - name: Add 404.html
-        working-directory: 'helpful-information'
         run: 'cp www/index.html www/404.html'
 
       - name: Add robots.txt
-        working-directory: 'helpful-information'
-        run: 'cp src/robots.private.txt www/robots.txt'
+        run: 'cp helpful-information/src/robots.private.txt www/robots.txt'
 
       - name: Setup GitHub Pages
         uses: actions/configure-pages@v3
+        with:
+          enablement: true
 
       - name: Upload artifact
-        uses: actions/upload-pages-artifact@v1
+        uses: actions/upload-pages-artifact@v2
         with:
-          path: 'helpful-information/www'
+          path: 'www'
 
       - name: Deploy to GitHub Pages
         id: deployment
