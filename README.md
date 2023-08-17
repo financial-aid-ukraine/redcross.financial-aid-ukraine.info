@@ -11,7 +11,7 @@ Public URL: <https://redcross.financial-aid-ukraine.info>
 ### `helpful-information` package
 
 Using:  
-![helpful-information version in use](https://img.shields.io/github/package-json/dependency-version/helpful-info/example/helpful-information?style=flat-square&logo=github)
+![helpful-information version in use](https://img.shields.io/github/package-json/dependency-version/financial-aid-ukraine/redcross.financial-aid-ukraine.info/helpful-information?style=flat-square&logo=github)
 
 Latest available:  
 [![GitHub helpful-information latest release](https://img.shields.io/github/v/release/rodekruis/helpful-information?display_name=tag&label=helpful-information%20release&logo=github)](https://github.com/rodekruis/helpful-information/releases/latest)
