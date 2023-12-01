@@ -127,7 +127,7 @@ jobs:
 
       - name: Install helpful-information
         working-directory: 'helpful-information'
-        run: 'npm ci --omit=optional --no-fund --no-audit'
+        run: 'npm ci --no-fund --no-audit'
         env:
           HUSKY: 0
 
